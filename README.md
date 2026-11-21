@@ -1,4 +1,4 @@
-# NetSentry AI
+f# NetSentry AI
 ### AI-Assisted Passive Network Threat Detection and Intelligence Platform
 
 ## About the Project
@@ -58,3 +58,14 @@ Cybersecurity | Network Security | Artificial Intelligence | Threat Detection
 ## Disclaimer
 
 This project is intended for educational purposes and authorised cybersecurity monitoring only.
+
+## Project Roadmap
+
+- [ ] Repository setup
+- [ ] Design SOC dashboard
+- [ ] Implement passive network monitoring
+- [ ] Develop network traffic analysis
+- [ ] Build AI-based anomaly detection
+- [ ] Integrate threat intelligence
+- [ ] Generate security alerts and reports
+- [ ] Testing and documentation
