@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% set active_page = "monitoring" %}
+{% block title %}Passive Network Monitoring{% endblock %}
+{% block page_title %}Passive Live Network Monitoring{% endblock %}
+
+{% block content %}
+<!-- Monitoring Control Bar -->
+<div class="panel" style="padding: 16px 20px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <label class="form-label" style="margin: 0;">Network Interface:</label>
+            <select id="interfaceSelect" class="form-control" style="width: 220px; padding: 6px 10px;">
+                <option value="default" selected>Default / Auto-Detect</option>
+                <option value="simulated">Simulated Lab Generator</option>
+            </select>
+            <span id="streamStateBadge" class="badge">CHECKING STATUS...</span>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button id="btnStartMonitoring" class="btn btn-primary">
+                &#x25B6; Start Monitoring
+            </button>
+            <button id="btnStopMonitoring" class="btn btn-danger" disabled>
+                &#x25A0; Stop Monitoring
+            </button>
+            <button id="btnClearStream" class="btn btn-secondary">
+                Clear View
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Passive Notice Banner -->
+<div style="background-color: rgba(0, 136, 255, 0.08); border-left: 4px solid var(--accent-blue); padding: 12px 18px; border-radius: 6px; font-size: 0.85rem; color: var(--text-secondary);">
+    <strong style="color: var(--accent-cyan);">&#x2139;&#xFE0F; Passive Operation Principle:</strong> 
+    NetSentry AI only sniffs packet headers in read-only mode. It does not modify, inject, or alter packet routing. 
+    On Windows without Administrator permissions or Npcap, safe simulated laboratory traffic is seamlessly generated for testing.
+</div>
+
+<!-- Live Packet Stream Table -->
+<div class="panel">
+    <div class="panel-header">
+        <div class="panel-title">&#x1F4E1; Live Packet Feed (Incoming Buffer)</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">Auto-updating every 1.5s</div>
+    </div>
+    <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
+        <table class="soc-table">
+            <thead>
+                <tr>
+                    <th style="width: 140px;">Timestamp</th>
+                    <th>Source IP:Port</th>
+                    <th>Destination IP:Port</th>
+                    <th>Protocol</th>
+                    <th>Length</th>
+                    <th>Status</th>
+                    <th>Anomaly Score</th>
+                    <th>Packet Summary</th>
+                </tr>
+            </thead>
+            <tbody id="packetStreamBody">
+                <!-- Dynamically populated by packet_stream.js -->
+                <tr>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                        Monitoring is currently idle. Click <strong>Start Monitoring</strong> above to begin live capture.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/packet_stream.js') }}"></script>
+{% endblock %}
+

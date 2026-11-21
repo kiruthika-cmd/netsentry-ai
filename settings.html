@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% set active_page = "settings" %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}Platform Configuration & Threat Intelligence Settings{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Threat Intelligence API Configuration -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">&#x1F511; Threat Intelligence API Credentials</div>
+        </div>
+        
+        {% if saved_msg %}
+        <div style="background-color: rgba(0, 204, 136, 0.15); border: 1px solid var(--sev-low); color: #66e6b8; padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; font-size: 0.85rem;">
+            {{ saved_msg }}
+        </div>
+        {% endif %}
+
+        <form action="{{ url_for('settings_view') }}" method="POST">
+            <div class="form-group">
+                <label class="form-label">AbuseIPDB API Key (Optional)</label>
+                <input type="password" name="abuseipdb_key" class="form-control" placeholder="Enter AbuseIPDB Key" value="{{ abuseipdb_key }}">
+                <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                    Used to query external IP threat reputation scores. Never hardcoded; stored securely.
+                </span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Anomaly Score Sensitivity Threshold</label>
+                <input type="text" name="anomaly_threshold" class="form-control" value="{{ anomaly_threshold }}">
+                <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                    Isolation Forest decision threshold (default: -0.15). Values below this threshold are flagged suspicious.
+                </span>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">
+                &#x1F4BE; Save Settings
+            </button>
+        </form>
+    </div>
+
+    <!-- Machine Learning Engine Status -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">&#x1F9E0; AI Anomaly Detection Status</div>
+        </div>
+        <div style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 14px;">
+            <div>
+                <span style="color: var(--text-secondary);">Algorithm:</span>
+                <strong style="color: var(--accent-cyan);">Isolation Forest (Scikit-Learn)</strong>
+            </div>
+            <div>
+                <span style="color: var(--text-secondary);">Contamination Rate:</span>
+                <strong>5.0% (0.05)</strong>
+            </div>
+            <div>
+                <span style="color: var(--text-secondary);">Trained Model Artifact:</span>
+                <strong style="color: var(--sev-low); font-family: var(--font-mono);">models/isolation_forest.joblib</strong>
+            </div>
+            <div style="background-color: var(--bg-secondary); padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); color: var(--text-secondary);">
+                <strong>SOC Anomaly Detection Disclaimer:</strong><br>
+                Anomaly detection models identify statistical deviations from established network baseline distributions. Deviations do not automatically constitute an active malicious attack without corroborating rule or human analysis.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

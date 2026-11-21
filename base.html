@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SOC Dashboard{% endblock %} - NetSentry AI</title>
+    <!-- Custom Dark Navy SOC Design System -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/soc_theme.css') }}">
+    <!-- Chart.js CDN for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="soc-sidebar">
+        <div class="soc-brand">
+            <div class="brand-icon">&#x1F6E1;</div>
+            <div class="brand-text">
+                <h1>NetSentry AI</h1>
+                <span>SOC Platform</span>
+            </div>
+        </div>
+        <ul class="soc-nav">
+            <li class="soc-nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                <a href="{{ url_for('dashboard') }}">
+                    <span class="nav-icon">&#x1F4CA;</span>
+                    <span>SOC Dashboard</span>
+                </a>
+            </li>
+            <li class="soc-nav-item {% if active_page == 'monitoring' %}active{% endif %}">
+                <a href="{{ url_for('monitoring') }}">
+                    <span class="nav-icon">&#x1F4E1;</span>
+                    <span>Live Monitoring</span>
+                </a>
+            </li>
+            <li class="soc-nav-item {% if active_page == 'pcap' %}active{% endif %}">
+                <a href="{{ url_for('pcap_analysis') }}">
+                    <span class="nav-icon">&#x1F4C1;</span>
+                    <span>PCAP Analysis</span>
+                </a>
+            </li>
+            <li class="soc-nav-item {% if active_page == 'alerts' %}active{% endif %}">
+                <a href="{{ url_for('alerts_view') }}">
+                    <span class="nav-icon">&#x26A0;&#xFE0F;</span>
+                    <span>Threat Detection</span>
+                </a>
+            </li>
+            <li class="soc-nav-item {% if active_page == 'incidents' %}active{% endif %}">
+                <a href="{{ url_for('incidents_view') }}">
+                    <span class="nav-icon">&#x1F50E;</span>
+                    <span>Incident Workbench</span>
+                </a>
+            </li>
+            <li class="soc-nav-item {% if active_page == 'reports' %}active{% endif %}">
+                <a href="{{ url_for('reports_view') }}">
+                    <span class="nav-icon">&#x1F4C4;</span>
+                    <span>Reports & Export</span>
+                </a>
+            </li>
+            <li class="soc-nav-item {% if active_page == 'settings' %}active{% endif %}">
+                <a href="{{ url_for('settings_view') }}">
+                    <span class="nav-icon">&#x2699;&#xFE0F;</span>
+                    <span>Platform Settings</span>
+                </a>
+            </li>
+        </ul>
+        <div class="soc-sidebar-footer">
+            <p><strong>NetSentry AI</strong> v1.0.0</p>
+            <p style="margin-top: 4px; color: var(--text-muted);">Passive Threat Engine</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="soc-layout">
+        <!-- Top Navigation Bar -->
+        <header class="soc-topbar">
+            <h2 class="page-title">{% block page_title %}Security Operations Center{% endblock %}</h2>
+            <div class="topbar-actions">
+                <div class="status-indicator">
+                    <div id="monitoringStatusDot" class="status-dot stopped"></div>
+                    <span id="monitoringStatusText">Monitoring Idle</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Body Container -->
+        <main class="soc-container">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
+

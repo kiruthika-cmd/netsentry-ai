@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% set active_page = "dashboard" %}
+{% block title %}SOC Overview{% endblock %}
+{% block page_title %}Executive SOC Dashboard{% endblock %}
+
+{% block content %}
+<!-- KPI Metrics Grid -->
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="metric-icon">&#x1F4E6;</div>
+        <div class="metric-info">
+            <h3>Total Packets Analysed</h3>
+            <div class="metric-value" id="totalPackets">{{ metrics.total_packets or 0 }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon success">&#x2714;&#xFE0F;</div>
+        <div class="metric-info">
+            <h3>Normal Traffic Count</h3>
+            <div class="metric-value" id="normalTraffic">{{ metrics.normal_traffic or 0 }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon warning">&#x26A0;&#xFE0F;</div>
+        <div class="metric-info">
+            <h3>Suspicious Traffic Count</h3>
+            <div class="metric-value" id="suspiciousTraffic">{{ metrics.suspicious_traffic or 0 }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon danger">&#x1F6A8;</div>
+        <div class="metric-info">
+            <h3>Critical Security Alerts</h3>
+            <div class="metric-value" id="criticalAlerts">{{ alert_counts.Critical or 0 }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Grid -->
+<div class="dashboard-grid">
+    <!-- Traffic Activity Line Chart -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">&#x1F4C8; Traffic Activity (Packets / Time)</div>
+        </div>
+        <div class="chart-container">
+            <canvas id="trafficActivityChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Protocol Distribution Donut Chart -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">&#x1F967; Protocol Distribution</div>
+        </div>
+        <div class="chart-container">
+            <canvas id="protocolDistributionChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Security Events Panel -->
+<div class="panel">
+    <div class="panel-header">
+        <div class="panel-title">&#x1F6E1;&#xFE0F; Recent Threat & Anomaly Detections</div>
+        <a href="{{ url_for('alerts_view') }}" class="btn btn-secondary" style="font-size: 0.78rem; padding: 4px 10px;">
+            View All Alerts &rarr;
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="soc-table">
+            <thead>
+                <tr>
+                    <th>Alert ID</th>
+                    <th>Timestamp</th>
+                    <th>Source IP</th>
+                    <th>Destination IP</th>
+                    <th>Type</th>
+                    <th>Rule / Reason</th>
+                    <th>Severity</th>
+                    <th>Risk Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if recent_alerts %}
+                    {% for alert in recent_alerts %}
+                    <tr>
+                        <td><strong>{{ alert.alert_id }}</strong></td>
+                        <td>{{ alert.timestamp }}</td>
+                        <td>{{ alert.src_ip }}</td>
+                        <td>{{ alert.dst_ip }}</td>
+                        <td>
+                            {% if alert.detection_type == 'ml' %}
+                            <span class="badge badge-ml">ML ANOMALY</span>
+                            {% else %}
+                            <span class="badge badge-rule">SIGNATURE</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ alert.rule_name }}</td>
+                        <td>
+                            {% if alert.severity == 'Critical' %}
+                            <span class="badge badge-critical">CRITICAL</span>
+                            {% elif alert.severity == 'High' %}
+                            <span class="badge badge-high">HIGH</span>
+                            {% elif alert.severity == 'Medium' %}
+                            <span class="badge badge-medium">MEDIUM</span>
+                            {% else %}
+                            <span class="badge badge-low">LOW</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-weight: 700; color: {% if alert.risk_score >= 80 %}#ff3366{% elif alert.risk_score >= 60 %}#ff9900{% else %}#00cc88{% endif %};">
+                            {{ alert.risk_score }}/100
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                            No security incidents detected yet. Start Live Monitoring or upload a PCAP file to begin passive analysis.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/soc_dashboard.js') }}"></script>
+{% endblock %}
+

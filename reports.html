@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% set active_page = "reports" %}
+{% block title %}SOC Reports & Export{% endblock %}
+{% block page_title %}Incident Reporting & CSV Export Center{% endblock %}
+
+{% block content %}
+<div class="metric-grid">
+    <!-- CSV Export Card 1: Security Alerts -->
+    <div class="panel" style="gap: 14px;">
+        <div class="panel-title">&#x1F4BE; Export Security Alerts</div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+            Download all detected security alerts including rule signatures, ML anomalies, severity classifications, and explainable audit trails.
+        </p>
+        <a href="{{ url_for('export_alerts_csv') }}" class="btn btn-primary" style="align-self: flex-start;">
+            &#x1F4E5; Download Alerts CSV
+        </a>
+    </div>
+
+    <!-- CSV Export Card 2: Analyzed Packets -->
+    <div class="panel" style="gap: 14px;">
+        <div class="panel-title">&#x1F4E6; Export Raw Packet Logs</div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+            Export parsed network packet headers (IPs, ports, protocols, timestamps, packet sizes, and anomaly scores) in CSV format.
+        </p>
+        <a href="{{ url_for('export_packets_csv') }}" class="btn btn-secondary" style="align-self: flex-start;">
+            &#x1F4E5; Download Packets CSV
+        </a>
+    </div>
+</div>
+
+<!-- Executive Summary Report -->
+<div class="panel" style="margin-top: 24px;">
+    <div class="panel-header">
+        <div class="panel-title">&#x1F4DD; Executive Incident Summary Report</div>
+        <button class="btn btn-secondary" onclick="window.print();" style="font-size: 0.8rem; padding: 4px 10px;">
+            &#x1F5B6;&#xFE0F; Print / Save PDF
+        </button>
+    </div>
+    <pre style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 18px; color: var(--text-primary); font-family: var(--font-mono); font-size: 0.82rem; white-space: pre-wrap; line-height: 1.6;">{{ summary_report }}</pre>
+</div>
+{% endblock %}
+

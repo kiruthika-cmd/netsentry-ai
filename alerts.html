@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% set active_page = "alerts" %}
+{% block title %}Threat Detection & Alerts{% endblock %}
+{% block page_title %}Security Threat Detection & Alerts{% endblock %}
+
+{% block content %}
+<!-- Explanation Callout -->
+<div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px 20px; font-size: 0.85rem; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+    <div>
+        <strong style="color: #ffffff;">Detection Paradigm:</strong> 
+        Deterministic rule signatures (<span class="badge badge-rule">SIGNATURE</span>) identify known attack behaviors like port scans and SYN floods. 
+        Isolation Forest (<span class="badge badge-ml">ML ANOMALY</span>) isolates statistical outliers without claiming definitive malicious intent.
+    </div>
+    <div style="display: flex; gap: 8px;">
+        <span class="badge badge-critical">Critical: &ge; 85</span>
+        <span class="badge badge-high">High: 65 - 84</span>
+        <span class="badge badge-medium">Medium: 40 - 64</span>
+        <span class="badge badge-low">Low: &lt; 40</span>
+    </div>
+</div>
+
+<!-- Alerts Table Panel -->
+<div class="panel">
+    <div class="panel-header">
+        <div class="panel-title">&#x1F6A8; Triggered Security Alerts ({{ alerts|length }})</div>
+    </div>
+    <div class="table-responsive">
+        <table class="soc-table">
+            <thead>
+                <tr>
+                    <th>Alert ID</th>
+                    <th>Timestamp</th>
+                    <th>Source IP</th>
+                    <th>Target IP</th>
+                    <th>Detection Type</th>
+                    <th>Rule / Reason</th>
+                    <th>Severity</th>
+                    <th>Risk Score</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if alerts %}
+                    {% for a in alerts %}
+                    <tr>
+                        <td><strong>{{ a.alert_id }}</strong></td>
+                        <td>{{ a.timestamp }}</td>
+                        <td><strong>{{ a.src_ip }}</strong></td>
+                        <td><strong>{{ a.dst_ip }}</strong></td>
+                        <td>
+                            {% if a.detection_type == 'ml' %}
+                            <span class="badge badge-ml">ML ANOMALY</span>
+                            {% else %}
+                            <span class="badge badge-rule">RULE SIGNATURE</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ a.rule_name }}</td>
+                        <td>
+                            {% if a.severity == 'Critical' %}
+                            <span class="badge badge-critical">CRITICAL</span>
+                            {% elif a.severity == 'High' %}
+                            <span class="badge badge-high">HIGH</span>
+                            {% elif a.severity == 'Medium' %}
+                            <span class="badge badge-medium">MEDIUM</span>
+                            {% else %}
+                            <span class="badge badge-low">LOW</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-weight: 700; color: {% if a.risk_score >= 80 %}#ff3366{% elif a.risk_score >= 60 %}#ff9900{% else %}#00cc88{% endif %};">
+                            {{ a.risk_score }}/100
+                        </td>
+                        <td>
+                            <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 8px;"
+                                onclick="openAuditModal('{{ a.alert_id }}', '{{ a.rule_name }}', '{{ a.src_ip }}', '{{ a.dst_ip }}', '{{ a.severity }}', '{{ a.risk_score }}', '{{ a.description|e }}', '{{ a.explanation|e }}')">
+                                Audit Reason
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                            No alerts currently triggered. All observed traffic is within baseline parameters.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal for Explainable Risk Breakdown -->
+<div id="auditModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle" style="color: #ffffff; font-size: 1.1rem;">Alert Audit Trail</h3>
+            <button onclick="closeAuditModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+        <div style="font-size: 0.88rem; display: flex; flex-direction: column; gap: 12px;">
+            <div>
+                <span style="color: var(--text-secondary);">Source Host:</span> 
+                <strong id="modalSrc" style="color: var(--accent-cyan);"></strong> 
+                &rarr; 
+                <span style="color: var(--text-secondary);">Target:</span> 
+                <strong id="modalDst" style="color: var(--text-primary);"></strong>
+            </div>
+            <div>
+                <span style="color: var(--text-secondary);">Risk Score:</span> 
+                <strong id="modalScore"></strong> | 
+                <span style="color: var(--text-secondary);">Severity:</span> 
+                <span id="modalSeverity"></span>
+            </div>
+            <div style="background-color: var(--bg-secondary); padding: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                <strong style="color: #ffffff; display: block; margin-bottom: 4px;">Incident Description:</strong>
+                <p id="modalDesc" style="color: var(--text-secondary);"></p>
+            </div>
+            <div style="background-color: var(--bg-secondary); padding: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                <strong style="color: #ffffff; display: block; margin-bottom: 4px;">Explainable Scoring Justification:</strong>
+                <p id="modalExpl" style="color: var(--accent-cyan); font-family: var(--font-mono); font-size: 0.82rem;"></p>
+            </div>
+        </div>
+        <div style="margin-top: 18px; text-align: right;">
+            <button onclick="closeAuditModal()" class="btn btn-secondary">Close Audit</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function openAuditModal(id, rule, src, dst, sev, score, desc, expl) {
+    document.getElementById("modalTitle").innerText = `Audit Trail: ${id} (${rule})`;
+    document.getElementById("modalSrc").innerText = src;
+    document.getElementById("modalDst").innerText = dst;
+    document.getElementById("modalScore").innerText = `${score}/100`;
+    document.getElementById("modalSeverity").innerText = sev;
+    document.getElementById("modalDesc").innerText = desc;
+    document.getElementById("modalExpl").innerText = expl;
+    document.getElementById("auditModal").style.display = "flex";
+}
+
+function closeAuditModal() {
+    document.getElementById("auditModal").style.display = "none";
+}
+</script>
+{% endblock %}
+
